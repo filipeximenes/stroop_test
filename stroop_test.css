@@ -1,0 +1,17 @@
+
+#test_area{
+    width: 200px;
+    height: 200px;
+}
+
+#selectors_area{
+    display: none;
+}
+
+#start{
+
+}
+
+.test_word{
+    position: relative;
+}
