@@ -7,7 +7,7 @@
 
     * start_game() - the method called after the count down ends.
 
-    * controller((boolean) result) - is a callback method, called after 
+    * controller((string) chosen_color) - is a callback method, called after 
     each answer given by the user.
 
     When the game ends if should call the log_result function 
