@@ -16,21 +16,22 @@
 
 // ----------------------- Stroop Off --------------------------------
 
-function StroopOff(number_of_collors, number_of_rounds){
+function StroopGame(number_of_collors, number_of_rounds, stroop){
     get_color_key_list(number_of_collors);
     this.number_of_rounds = number_of_rounds;
     this.round = 0;
     this.current_collor = null;
     this.started_att = null;
     this.ended_att = null;
+    this.stroop = stroop
 }
 
-StroopOff.prototype.start_game = function(){
+StroopGame.prototype.start_game = function(){
     this.started_att = new Date();
     this.game();
 }
 
-StroopOff.prototype.controller = function(chosen_color){
+StroopGame.prototype.controller = function(chosen_color){
     if (chosen_color === this.current_collor){
         if (this.round < this.number_of_rounds){
             this.game();
@@ -46,23 +47,17 @@ StroopOff.prototype.controller = function(chosen_color){
     }
 }
 
-StroopOff.prototype.game = function(){
+StroopGame.prototype.game = function(){
     this.round += 1
     clear_game_area()
     this.current_collor = get_random_key();
-    $("#test_area").append(generate_formated_text(this.current_collor))
+    print_on_game(this.current_collor, this.stroop)
     populate_selectors_area()
 }
 
-StroopOff.prototype.get_total_time = function(){
+StroopGame.prototype.get_total_time = function(){
     return (this.ended_att - this.started_att) / 1000
 }
-
-// ----------------------- Stroop On ---------------------------------
-
-/*
- * TODO
-*/
 
 // -------------------------------------------------------------------
 // ---------------------------- Logs ---------------------------------
@@ -76,6 +71,12 @@ function GameLog(total_time, result){
 // -------------------------------------------------------------------
 // ---------------------------- Utils --------------------------------
 // -------------------------------------------------------------------
+
+var color_names = {'Vermelho': 'red', 'Azul': 'blue', 'Verde': 'green', 'Preto': 'black'}
+var color_keys = []
+
+var game_playing = null
+var logs = []
 
 function shuffleArray(array) {
     for (var i = array.length - 1; i > 0; i--) {
@@ -115,53 +116,12 @@ function get_color_key_list(size){
 // ------------------------ Game Area --------------------------------
 // -------------------------------------------------------------------
 
-var color_names = {'Vermelho': 'red', 'Azul': 'blue', 'Verde': 'green', 'Preto': 'black'}
-var color_keys = []
-
-var game_playing = null
-var logs = []
-
 function start_test(){
     clear_game_area()
     $("#start_button").hide();
     $("#selectors_area").show();
-    game_playing = new StroopOff(3, 10)
+    game_playing = new StroopGame(3, 10, true)
     play_count_down(3)
-}
-
-function clear_game_area(){
-    $("#test_area").html('');
-    $("#selectors_area").html('');
-}
-
-function populate_selectors_area(){
-    color_list = get_color_key_list().slice(0)
-    color_list = shuffleArray(color_list)
-
-    for (key in color_list){
-        button = $("<button></button>");
-        button.html(color_list[key]);
-        button.click(function(){
-            game_playing.controller($(this).text())
-        })
-        $("#selectors_area").append(button);
-    }
-}
-
-function generate_formated_text(color_key, stroop){
-    color_list = get_color_key_list()
-    if (!stroop){
-        text = "#####"
-        chosen_color = color_names[color_key]
-    }else{
-        text = color_key
-        chosen_color = color_names[get_random_key()]
-    }
-    span_tag = $("<span><span>")
-    span_tag.text(text)
-    span_tag.css('color', chosen_color)
-
-    return span_tag
 }
 
 function play_count_down(showing_time, count_down){
@@ -184,6 +144,40 @@ function play_count_down(showing_time, count_down){
     }
 }
 
+function clear_game_area(){
+    $("#test_area").html('');
+    $("#selectors_area").html('');
+}
+
+function populate_selectors_area(){
+    color_list = get_color_key_list().slice(0)
+    color_list = shuffleArray(color_list)
+
+    for (key in color_list){
+        button = $("<button></button>");
+        button.html(color_list[key]);
+        button.click(function(){
+            game_playing.controller($(this).text())
+        })
+        $("#selectors_area").append(button);
+    }
+}
+
+function print_on_game(color_key, stroop){
+    color_list = get_color_key_list()
+    if (!stroop){
+        text = "#####"
+    }else{
+        text = get_random_key()
+    }
+    chosen_color = color_names[color_key]
+    span_tag = $("<span><span>")
+    span_tag.text(text)
+    span_tag.css('color', chosen_color)
+
+    $("#test_area").append(span_tag)
+}
+
 function show_result(){
     clear_game_area()
     $("#start_button").show();
@@ -199,4 +193,3 @@ function log_result(log){
 }
 
 $("#start_button").click(start_test);
-
