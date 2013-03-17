@@ -14,7 +14,7 @@
     with a GameLog object.
 */
 
-// ----------------------- Stroop Off --------------------------------
+// ----------------------- Stroop Game --------------------------------
 
 function StroopGame(number_of_collors, number_of_rounds, stroop){
     get_color_key_list(number_of_collors);
