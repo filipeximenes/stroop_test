@@ -37,12 +37,12 @@ StroopGame.prototype.controller = function(chosen_color){
             this.game();
         }else{
             this.ended_att = new Date();
-            res = new GameLog(this.get_total_time(), true)
+            res = new GameLog(this.get_total_time(), true, this.stroop)
             log_result(res);
         }
     }else{
         this.ended_att = new Date();
-        res = new GameLog(this.get_total_time(), false)
+        res = new GameLog(this.get_total_time(), false, this.stroop)
         log_result(res);
     }
 }
@@ -63,9 +63,15 @@ StroopGame.prototype.get_total_time = function(){
 // ---------------------------- Logs ---------------------------------
 // -------------------------------------------------------------------
 
-function GameLog(total_time, result){
+function GameLog(total_time, result, stroop){
     this.total_time = total_time;
     this.result = result;
+    this.stroop = stroop;
+    this.round = 0;
+}
+
+GameLog.prototype.set_round = function(round){
+    this.round = round
 }
 
 // -------------------------------------------------------------------
@@ -112,17 +118,19 @@ function get_color_key_list(size){
     return color_keys    
 }
 
+function successfull_attempts(){
+    var successfull = 0;
+    for (key in logs){
+        if (logs[key].result){
+            successfull += 1;
+        }
+    }
+    return successfull
+}
+
 // -------------------------------------------------------------------
 // ------------------------ Game Area --------------------------------
 // -------------------------------------------------------------------
-
-function start_test(){
-    clear_game_area()
-    $("#start_button").hide();
-    $("#selectors_area").show();
-    game_playing = new StroopGame(3, 10, true)
-    play_count_down(3)
-}
 
 function play_count_down(showing_time, count_down){
     if (showing_time > 0){
@@ -187,9 +195,67 @@ function show_result(){
     }
 }
 
+function show_instruction(){
+    clear_game_area()
+    $("#start_button").show();
+    $("#selectors_area").hide();
+    $("#test_area").append("instruction");
+    last_round = current_round;
+}
+
+var current_round = 0
+var last_round = -1
+
 function log_result(log){
-    logs.push(log)    
+    log.set_round(current_round)
+    logs.push(log)
+    last_round = current_round;
+    if (log.result){
+        current_round += 1;
+    }
     show_result()
 }
 
-$("#start_button").click(start_test);
+function start_test(stroop){
+    clear_game_area()
+    $("#start_button").hide();
+    $("#selectors_area").show();
+    game_playing = new StroopGame(3, 2, stroop)
+    play_count_down(3)
+}
+
+function full_test(){
+    if (current_round < 2){
+        if (last_round === -1){
+            show_instruction()
+        }else{
+            // stroop off pactice
+            start_test(false)
+        }
+    }else if (current_round < 7){
+        if (last_round === 1){
+            show_instruction()
+        }else{
+            // stroop off
+            start_test(false)
+        }
+    }else if (current_round < 9){
+        if (last_round === 6){
+            show_instruction()
+        }else{
+            // stroop on pactice
+            start_test(true)
+        }
+    }else if (current_round < 14){
+        if (last_round === 8){
+            show_instruction()
+        }else{
+            // stroop on
+            start_test(true)
+        }
+    }else{
+        // completed
+    }
+}
+
+$("#start_button").click(full_test);
